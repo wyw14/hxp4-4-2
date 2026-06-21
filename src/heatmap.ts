@@ -77,26 +77,17 @@ export class Heatmap {
     this.antennaElement.textContent = `${Math.round(antenna)}°`;
   }
 
-  public update(): void {
-    let maxStrength = 0;
-    const strengths: number[][] = [];
+  public forceHighlightUpdate(): void {
+    this.updateCurrentCellHighlight();
+  }
 
+  public update(): void {
     for (let row = 0; row < this.ROWS; row++) {
-      strengths[row] = [];
       for (let col = 0; col < this.COLS; col++) {
         const cell = this.cells[row][col];
         const strength = this.calculateCombinedStrength(cell.vhf, cell.uhf);
-        strengths[row][col] = strength;
-        if (strength > maxStrength) maxStrength = strength;
-      }
-    }
-
-    for (let row = 0; row < this.ROWS; row++) {
-      for (let col = 0; col < this.COLS; col++) {
-        const cell = this.cells[row][col];
-        const normalized = maxStrength > 0 ? strengths[row][col] / maxStrength : 0;
-        cell.strength = normalized;
-        this.updateCellAppearance(cell, normalized);
+        cell.strength = strength;
+        this.updateCellAppearance(cell, strength);
       }
     }
 
@@ -126,11 +117,16 @@ export class Heatmap {
         ];
       }
 
-      const vhfMatch = calculateMatchStrength(vhf, effectiveVhfRange, 12);
-      const uhfMatch = calculateMatchStrength(uhf, effectiveUhfRange, 30);
-      const antennaMatch = calculateMatchStrength(this.currentAntenna, effectiveAntennaRange, 25);
+      const vhfMatch = calculateMatchStrength(vhf, effectiveVhfRange, 10);
+      const uhfMatch = calculateMatchStrength(uhf, effectiveUhfRange, 25);
+      const antennaMatch = calculateMatchStrength(this.currentAntenna, effectiveAntennaRange, 20);
 
-      const combined = (vhfMatch * 0.35 + uhfMatch * 0.35 + antennaMatch * 0.3) * signal.intensity;
+      const minMatch = Math.min(vhfMatch, uhfMatch, antennaMatch);
+      if (minMatch < 0.15) {
+        continue;
+      }
+
+      const combined = Math.pow(vhfMatch * uhfMatch * antennaMatch, 0.7) * signal.intensity;
 
       if (combined > maxCombined) {
         maxCombined = combined;
@@ -140,31 +136,32 @@ export class Heatmap {
     return maxCombined;
   }
 
-  private updateCellAppearance(cell: HeatmapCell, normalizedStrength: number): void {
+  private updateCellAppearance(cell: HeatmapCell, strength: number): void {
     const element = cell.element;
 
-    if (normalizedStrength < 0.05) {
+    if (strength < 0.03) {
       element.style.backgroundColor = '#0a150a';
       element.style.color = 'transparent';
       element.classList.remove('active');
+      element.style.boxShadow = 'none';
       return;
     }
 
-    const t = Math.pow(normalizedStrength, 0.6);
+    const t = Math.pow(Math.min(strength * 1.4, 1), 1.4);
 
-    const r = Math.round(lerp(10, 80, t));
-    const g = Math.round(lerp(21, 200, t));
-    const b = Math.round(lerp(10, 120, t));
+    const r = Math.round(lerp(10, 70, t));
+    const g = Math.round(lerp(21, 230, t));
+    const b = Math.round(lerp(10, 140, t));
 
     const bgColor = `rgb(${r}, ${g}, ${b})`;
-    const glowColor = `rgba(${Math.round(r * 1.5)}, ${Math.round(g * 1.5)}, ${Math.round(b * 1.5)}, ${0.3 + t * 0.5})`;
+    const glowColor = `rgba(${Math.round(r * 1.6)}, ${Math.round(g * 1.6)}, ${Math.round(b * 1.6)}, ${0.2 + t * 0.6})`;
 
     element.style.backgroundColor = bgColor;
     element.style.color = `rgb(${Math.round(r * 2)}, ${Math.round(g * 2)}, ${Math.round(b * 2)})`;
 
-    if (normalizedStrength > 0.3) {
+    if (strength > 0.25) {
       element.classList.add('active');
-      element.style.boxShadow = `0 0 ${4 + t * 8}px ${glowColor}, inset 0 0 4px rgba(255, 255, 255, ${0.1 + t * 0.3})`;
+      element.style.boxShadow = `0 0 ${4 + t * 10}px ${glowColor}, inset 0 0 4px rgba(255, 255, 255, ${0.1 + t * 0.4})`;
     } else {
       element.classList.remove('active');
       element.style.boxShadow = 'none';

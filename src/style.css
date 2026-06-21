@@ -6,37 +6,44 @@
 
 html, body {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
   background: #0a0a0a;
   font-family: 'Courier New', monospace;
 }
 
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 #app {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  padding: 24px 16px;
   background: 
-    radial-gradient(ellipse at center, #1a0f0f 0%, #0a0a0a 60%, #000000 100%);
+    radial-gradient(ellipse at center top, #1a0f0f 0%, #0a0a0a 60%, #000000 100%);
 }
 
 .tv-frame {
   background: linear-gradient(145deg, #2a2420, #1a1410);
   border-radius: 18px;
-  padding: 28px;
+  padding: 20px;
   box-shadow:
     0 0 0 4px #0a0806,
     0 0 0 8px #1a1410,
     0 25px 80px rgba(0, 0, 0, 0.9),
     inset 0 2px 4px rgba(255, 255, 255, 0.05);
+  max-width: 100%;
 }
 
 .tv-screen-container {
   position: relative;
-  width: 640px;
-  height: 480px;
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 4 / 3;
   background: #000;
   border-radius: 12px;
   overflow: hidden;
@@ -138,10 +145,11 @@ html, body {
 }
 
 .tv-body {
-  margin-top: 24px;
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
+  max-width: 640px;
 }
 
 .brand-label {
@@ -157,12 +165,14 @@ html, body {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 16px 24px;
+  padding: 14px 16px;
   background: linear-gradient(145deg, #1a1410, #0f0c08);
   border-radius: 8px;
   box-shadow:
     inset 0 2px 6px rgba(0, 0, 0, 0.8),
     inset 0 -1px 2px rgba(255, 255, 255, 0.03);
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .knob-group {
@@ -224,10 +234,11 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 20px;
+  padding: 10px 14px;
   background: linear-gradient(145deg, #1a1410, #0f0c08);
   border-radius: 6px;
-  gap: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .signal-meter {
@@ -330,12 +341,13 @@ html, body {
 }
 
 .heatmap-container {
-  padding: 12px 16px;
+  padding: 12px 14px;
   background: linear-gradient(145deg, #1a1410, #0f0c08);
   border-radius: 8px;
   box-shadow:
     inset 0 2px 6px rgba(0, 0, 0, 0.8),
     inset 0 -1px 2px rgba(255, 255, 255, 0.03);
+  overflow: hidden;
 }
 
 .heatmap-header {
@@ -343,6 +355,7 @@ html, body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .heatmap-title {
@@ -351,18 +364,21 @@ html, body {
   letter-spacing: 3px;
   font-weight: bold;
   text-shadow: 0 0 8px rgba(74, 138, 90, 0.5);
+  white-space: nowrap;
 }
 
 .heatmap-antenna {
   color: #3a6a7a;
   font-size: 10px;
   letter-spacing: 1px;
+  white-space: nowrap;
 }
 
 .heatmap-labels {
   display: flex;
   align-items: stretch;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .heatmap-y-label {
@@ -377,10 +393,14 @@ html, body {
   align-items: center;
   justify-content: center;
   text-shadow: 0 0 6px rgba(74, 106, 90, 0.4);
+  flex-shrink: 0;
+  min-height: 140px;
+  padding: 2px 0;
 }
 
 .heatmap-grid-wrapper {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -393,6 +413,7 @@ html, body {
   font-weight: bold;
   text-align: center;
   text-shadow: 0 0 6px rgba(74, 106, 90, 0.4);
+  flex-shrink: 0;
 }
 
 .heatmap-grid {
@@ -400,7 +421,9 @@ html, body {
   grid-template-columns: repeat(16, 1fr);
   grid-template-rows: repeat(12, 1fr);
   gap: 2px;
-  aspect-ratio: 4 / 3;
+  min-width: 288px;
+  min-height: 180px;
+  width: 100%;
   background: #050806;
   padding: 4px;
   border-radius: 4px;
@@ -409,6 +432,7 @@ html, body {
   box-shadow:
     inset 0 0 20px rgba(0, 0, 0, 0.8),
     0 0 1px rgba(74, 138, 90, 0.2);
+  flex-shrink: 0;
 }
 
 .heatmap-grid::before {
@@ -426,32 +450,36 @@ html, body {
   );
   pointer-events: none;
   border-radius: 4px;
+  z-index: 1;
 }
 
 .heatmap-cell {
   background: #0a150a;
   border-radius: 1px;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: background-color 0.08s ease, box-shadow 0.08s ease;
   position: relative;
-  min-width: 0;
-  min-height: 0;
+  min-width: 16px;
+  min-height: 12px;
+  aspect-ratio: 1;
+  z-index: 0;
 }
 
 .heatmap-cell:hover {
-  transform: scale(1.15);
-  z-index: 2;
-  box-shadow: 0 0 8px currentColor;
+  transform: scale(1.12);
+  z-index: 5;
+  box-shadow: 0 0 10px currentColor;
 }
 
 .heatmap-cell.active {
   box-shadow: 0 0 6px currentColor, inset 0 0 4px rgba(255, 255, 255, 0.3);
+  z-index: 2;
 }
 
 .heatmap-cell.current {
   outline: 2px solid #ffaa00;
   outline-offset: -1px;
-  z-index: 3;
+  z-index: 4;
   animation: currentPulse 1s infinite;
 }
 
@@ -466,17 +494,20 @@ html, body {
   justify-content: center;
   gap: 8px;
   margin-top: 8px;
+  flex-shrink: 0;
 }
 
 .legend-label {
   color: #4a6a5a;
   font-size: 9px;
   letter-spacing: 1px;
+  white-space: nowrap;
 }
 
 .legend-bar {
   flex: 1;
-  max-width: 200px;
+  min-width: 80px;
+  max-width: 220px;
   height: 8px;
   background: linear-gradient(
     to right,
@@ -505,4 +536,57 @@ html, body {
     transparent 2px
   );
   border-radius: 2px;
+}
+
+@media (max-width: 520px) {
+  #app {
+    padding: 12px 8px;
+  }
+
+  .tv-frame {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .tv-body {
+    margin-top: 14px;
+    gap: 10px;
+  }
+
+  .brand-label {
+    font-size: 12px;
+    letter-spacing: 5px;
+  }
+
+  .knob {
+    width: 52px;
+    height: 52px;
+  }
+
+  .knob-mark {
+    top: 6px;
+    height: 13px;
+    width: 2px;
+  }
+
+  .heatmap-grid {
+    min-width: 0;
+    min-height: 140px;
+  }
+
+  .heatmap-cell {
+    min-width: 12px;
+    min-height: 9px;
+  }
+
+  .heatmap-y-label {
+    min-height: 100px;
+    font-size: 9px;
+  }
+
+  .instructions {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
 }

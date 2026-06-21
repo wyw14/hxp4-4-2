@@ -138,11 +138,14 @@ export class KnobController {
     return this.states.get(param)?.value ?? 0;
   }
 
-  setValue(param: KnobParam, value: number): void {
+  setValue(param: KnobParam, value: number, emitChange: boolean = true): void {
     const state = this.states.get(param);
     if (state) {
       state.value = clamp(value, state.min, state.max);
       this.updateVisual(param);
+      if (emitChange) {
+        this.onChange(param, state.value);
+      }
     }
   }
 }

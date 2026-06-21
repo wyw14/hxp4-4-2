@@ -150,11 +150,13 @@ class Game {
   }
 
   private handleHeatmapClick(vhf: number, uhf: number): void {
-    this.tuner.vhf = vhf;
-    this.tuner.uhf = uhf;
     if (this.knobController) {
       this.knobController.setValue('vhf', vhf);
       this.knobController.setValue('uhf', uhf);
+    }
+    if (this.heatmap) {
+      this.heatmap.setCurrentTuning(this.tuner.vhf, this.tuner.uhf, this.tuner.antenna);
+      this.heatmap.forceHighlightUpdate();
     }
   }
 

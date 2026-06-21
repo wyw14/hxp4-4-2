@@ -65,9 +65,28 @@
             <span class="power-label">AUDIO</span>
           </button>
         </div>
+
+        <div class="heatmap-container">
+          <div class="heatmap-header">
+            <div class="heatmap-title">SPECTRUM ANALYZER</div>
+            <div class="heatmap-antenna">ANT: <span id="heatmapAntenna">180°</span></div>
+          </div>
+          <div class="heatmap-labels">
+            <div class="heatmap-y-label">UHF</div>
+            <div class="heatmap-grid-wrapper">
+              <div class="heatmap-x-label">VHF</div>
+              <div class="heatmap-grid" id="heatmapGrid"></div>
+            </div>
+          </div>
+          <div class="heatmap-legend">
+            <span class="legend-label">WEAK</span>
+            <div class="legend-bar"></div>
+            <span class="legend-label">STRONG</span>
+          </div>
+        </div>
         
         <div class="instructions">
-          <div>Drag knobs to tune • Scroll to fine-tune</div>
+          <div>Drag knobs to tune • Click heatmap to jump</div>
           <div id="foundCount">Signals found: 0 / 4</div>
         </div>
       </div>

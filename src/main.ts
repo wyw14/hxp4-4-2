@@ -1,6 +1,7 @@
 import { CRTRenderer } from './renderer';
 import { AudioManager } from './audio';
 import { KnobController, type KnobParam } from './knobs';
+import { Heatmap } from './heatmap';
 import {
   findBestSignalMatch,
   getSignalColor,
@@ -15,6 +16,7 @@ class Game {
   private audioManager: AudioManager;
   private knobController: KnobController | null = null;
   private weatherSystem: WeatherSystem | null = null;
+  private heatmap: Heatmap | null = null;
 
   private signals: Signal[] = [];
   private tuner: TunerState = { vhf: 100, uhf: 400, antenna: 180 };
@@ -40,6 +42,8 @@ class Game {
     binaryStream: HTMLElement;
     foundCount: HTMLElement;
     audioToggle: HTMLButtonElement;
+    heatmapGrid: HTMLElement;
+    heatmapAntenna: HTMLElement;
   };
 
   constructor() {
@@ -61,7 +65,9 @@ class Game {
       signalDescription: get('signalOverlay').querySelector('.signal-description') as HTMLElement,
       binaryStream: get('signalOverlay').querySelector('.binary-stream') as HTMLElement,
       foundCount: get('foundCount'),
-      audioToggle: get('audioToggle') as HTMLButtonElement
+      audioToggle: get('audioToggle') as HTMLButtonElement,
+      heatmapGrid: get('heatmapGrid'),
+      heatmapAntenna: get('heatmapAntenna')
     };
   }
 
@@ -70,6 +76,15 @@ class Game {
       const signalsData = await this.loadSignals();
       this.signals = signalsData.signals;
       this.weatherSystem = new WeatherSystem(signalsData.weatherConfig);
+
+      this.heatmap = new Heatmap(
+        this.elements.heatmapGrid,
+        this.elements.heatmapAntenna,
+        this.signals,
+        (vhf: number, uhf: number) => {
+          this.handleHeatmapClick(vhf, uhf);
+        }
+      );
     } catch (e) {
       console.error('Failed to load signals:', e);
       return;
@@ -132,6 +147,15 @@ class Game {
     const response = await fetch('/signals.json');
     if (!response.ok) throw new Error('Failed to load signals');
     return response.json();
+  }
+
+  private handleHeatmapClick(vhf: number, uhf: number): void {
+    this.tuner.vhf = vhf;
+    this.tuner.uhf = uhf;
+    if (this.knobController) {
+      this.knobController.setValue('vhf', vhf);
+      this.knobController.setValue('uhf', uhf);
+    }
   }
 
   private updateSignalMatch(): void {
@@ -200,6 +224,12 @@ class Game {
       this.weatherOffset = weatherResult.offset;
       this.updateSignalMatch();
       this.updateSmoothing();
+
+      if (this.heatmap) {
+        this.heatmap.setWeatherOffset(this.weatherOffset);
+        this.heatmap.setCurrentTuning(this.tuner.vhf, this.tuner.uhf, this.tuner.antenna);
+        this.heatmap.update();
+      }
 
       if (this.renderer) {
         this.renderer.render({
